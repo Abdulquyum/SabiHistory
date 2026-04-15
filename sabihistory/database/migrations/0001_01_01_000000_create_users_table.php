@@ -17,6 +17,11 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', ['student', 'lecturer', 'admin'])->default('student');
+            $table->string('matric_no')->nullable()->unique();
+            $table->integer('level')->nullable(); // 100, 200, 300, 400
+            $table->string('department')->default('History & Strategic Studies');
+            $table->integer('points')->default(0); // for upload rewards
             $table->rememberToken();
             $table->timestamps();
         });
