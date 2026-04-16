@@ -83,4 +83,4 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::post('/courses', [CourseController::class, 'store'])->name('admin.courses.store');
 });
 
-require __DIR__.'/auth.php';
+// require __DIR__.'/auth.php';
