@@ -11,7 +11,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'name', 'email', 'password', 'role', 'matric_no', 'level', 'department', 'points'
+        'name', 'email', 'password', 'role', 'matric_no', 'level', 'department', 'points', 'is_admin'
     ];
 
     protected $hidden = [
@@ -23,6 +23,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
         ];
     }
 
@@ -42,14 +43,27 @@ class User extends Authenticatable
         return $this->hasMany(LecturerReview::class);
     }
 
-    // Check if user is admin
+    // Admin check - SINGLE VERSION (no duplicate)
     public function isAdmin()
     {
-        return $this->role === 'admin';
+        return $this->is_admin == true || $this->role === 'admin';
     }
 
+    // Super admin check
+    public function isSuperAdmin()
+    {
+        return $this->email === 'admin@sabihistory.com';
+    }
+
+    // Role checks
     public function isLecturer()
     {
         return $this->role === 'lecturer';
+    }
+
+    // Scope for admin queries
+    public function scopeAdmins($query)
+    {
+        return $query->where('is_admin', true);
     }
 }

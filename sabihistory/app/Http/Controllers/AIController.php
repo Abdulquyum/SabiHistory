@@ -36,20 +36,26 @@ class AIController extends Controller
         // Get AI response with context
         $response = $this->ai->research($request->query, $relatedMaterials);
 
-        // Log the session
-        $aiSession = AiSession::create([
-            'user_id' => Auth::id() ?? 1, // Guest fallback
-            'query' => $request->query,
-            'response' => $response,
-            'query_type' => 'research',
-            'related_material_ids' => $relatedMaterials->pluck('id')->toJson()
-        ]);
+        $sessionId = null;
+
+        // Log the session for authenticated users
+        if (Auth::check()) {
+            $aiSession = AiSession::create([
+                'user_id' => Auth::id(),
+                'query' => $request->query,
+                'response' => $response,
+                'query_type' => 'research',
+                'related_material_ids' => $relatedMaterials->pluck('id')->toJson(),
+            ]);
+
+            $sessionId = $aiSession->id;
+        }
 
         return response()->json([
             'success' => true,
             'response' => $response,
             'related_materials' => $relatedMaterials,
-            'session_id' => $aiSession->id
+            'session_id' => $sessionId
         ]);
     }
 
