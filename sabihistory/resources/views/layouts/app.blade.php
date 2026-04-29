@@ -152,6 +152,10 @@
             @else
                 @yield('content')
             @endisset
+
+            <footer class="mt-8 pt-4 border-t border-gray-200">
+                <p class="text-center text-sm text-gray-500">Prof Coy 2026</p>
+            </footer>
         </main>
     </div>
 

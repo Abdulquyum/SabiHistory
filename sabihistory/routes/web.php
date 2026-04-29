@@ -92,7 +92,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/materials/pending', [MaterialController::class, 'pending'])->name('admin.materials.pending');
     Route::post('/materials/{material}/approve', [MaterialController::class, 'approve'])->name('admin.materials.approve');
     Route::delete('/materials/{material}', [MaterialController::class, 'destroy'])->name('admin.materials.destroy');
-    Route::post('/news', [NewsController::class, 'store'])->name('admin.news.store');
     Route::post('/courses', [CourseController::class, 'store'])->name('admin.courses.store');
 });
 
@@ -115,8 +114,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/materials/{material}/approve', [App\Http\Controllers\Admin\AdminController::class, 'approveMaterial'])->name('materials.approve');
     Route::delete('/materials/{material}', [App\Http\Controllers\Admin\AdminController::class, 'rejectMaterial'])->name('materials.reject');
 
+    // News Management
+    Route::get('/news', [App\Http\Controllers\Admin\AdminController::class, 'news'])->name('news');
+    Route::post('/news', [NewsController::class, 'store'])->name('news.store');
+    Route::get('/news/{news}/edit', [NewsController::class, 'edit'])->name('news.edit');
+    Route::put('/news/{news}', [NewsController::class, 'update'])->name('news.update');
+    Route::delete('/news/{news}', [NewsController::class, 'destroy'])->name('news.delete');
+
     // Course Management
     Route::get('/courses', [App\Http\Controllers\Admin\AdminController::class, 'courses'])->name('courses');
+    Route::get('/courses/{course}/edit', [App\Http\Controllers\Admin\AdminController::class, 'editCourse'])->name('courses.edit');
     Route::post('/courses', [App\Http\Controllers\Admin\AdminController::class, 'storeCourse'])->name('courses.store');
     Route::put('/courses/{course}', [App\Http\Controllers\Admin\AdminController::class, 'updateCourse'])->name('courses.update');
     Route::delete('/courses/{course}', [App\Http\Controllers\Admin\AdminController::class, 'deleteCourse'])->name('courses.delete');

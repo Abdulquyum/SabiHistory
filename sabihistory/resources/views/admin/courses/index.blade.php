@@ -53,9 +53,9 @@
                             <td class="px-6 py-4 text-sm text-gray-600">{{ $course->lecturer->name ?? 'Unassigned' }}</td>
                             <td class="px-6 py-4 text-sm">
                                 <div class="flex gap-2">
-                                    <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs font-medium transition" data-bs-toggle="modal" data-bs-target="#editCourseModal">
+                                    <a href="{{ route('admin.courses.edit', $course) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-xs font-medium transition inline-flex items-center gap-1">
                                         <i class="fas fa-edit"></i> Edit
-                                    </button>
+                                    </a>
                                     <form method="POST" action="{{ route('admin.courses.delete', $course) }}" class="inline" onsubmit="return confirm('Delete this course?');">
                                         @csrf
                                         @method('DELETE')

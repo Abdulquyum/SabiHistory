@@ -50,6 +50,9 @@
                     <a href="{{ route('admin.projects.index') }}" class="nav-link block py-2 px-3 rounded-lg {{ request()->routeIs('admin.projects*') ? 'active' : '' }}">
                         <i class="fas fa-graduation-cap mr-2 text-emerald-400"></i> Projects
                     </a>
+                    <a href="{{ route('admin.news') }}" class="nav-link block py-2 px-3 rounded-lg {{ request()->routeIs('admin.news*') ? 'active' : '' }}">
+                        <i class="fas fa-newspaper mr-2 text-red-400"></i> News
+                    </a>
                     <a href="{{ route('admin.courses') }}" class="nav-link block py-2 px-3 rounded-lg {{ request()->routeIs('admin.courses*') ? 'active' : '' }}">
                         <i class="fas fa-book mr-2 text-orange-400"></i> Courses
                     </a>
@@ -78,7 +81,7 @@
                     </button>
                 </form>
                 <div class="text-xs text-gray-500 text-center pt-2 border-t border-gray-700">
-                    Admin v1.0
+                    Prof Coy 2026
                 </div>
             </div>
         </aside>

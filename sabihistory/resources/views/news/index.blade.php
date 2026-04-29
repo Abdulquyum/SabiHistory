@@ -31,9 +31,17 @@
                                 </span>
                             </div>
                         </div>
-                        @if($item->image_url)
+                        @if($item->attachment_type === 'image' && $item->attachment_path)
+                            <div class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+                                <img src="{{ asset('storage/' . $item->attachment_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover">
+                            </div>
+                        @elseif($item->image_url)
                             <div class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
                                 <img src="{{ $item->image_url }}" alt="{{ $item->title }}" class="w-full h-full object-cover">
+                            </div>
+                        @elseif($item->attachment_type === 'pdf' && $item->attachment_path)
+                            <div class="w-20 h-20 flex-shrink-0 rounded-lg bg-red-50 border border-red-200 flex items-center justify-center text-red-600">
+                                <i class="fas fa-file-pdf text-2xl"></i>
                             </div>
                         @endif
                     </div>
@@ -41,6 +49,11 @@
                     <a href="{{ route('news.show', $item) }}" class="inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-medium text-sm">
                         Read More <i class="fas fa-arrow-right"></i>
                     </a>
+                    @if($item->attachment_type === 'pdf' && $item->attachment_path)
+                        <a href="{{ asset('storage/' . $item->attachment_path) }}" target="_blank" class="inline-flex items-center gap-2 text-gray-600 hover:text-gray-700 font-medium text-sm ml-4">
+                            <i class="fas fa-file-pdf"></i> View PDF
+                        </a>
+                    @endif
                 </div>
             </div>
         @empty

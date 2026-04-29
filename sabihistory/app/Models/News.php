@@ -13,6 +13,8 @@ class News extends Model
         'title',
         'content',
         'image_url',
+        'attachment_path',
+        'attachment_type',
         'source_url',
         'category',
         'posted_by',

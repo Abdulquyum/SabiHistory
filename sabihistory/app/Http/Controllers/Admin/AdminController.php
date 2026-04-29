@@ -85,6 +85,13 @@ class AdminController extends Controller
         return view('admin.materials.index', compact('materials'));
     }
 
+    // News Management
+    public function news()
+    {
+        $news = News::with('author')->latest('published_at')->paginate(15);
+        return view('admin.news.index', compact('news'));
+    }
+
     public function approveMaterial(Material $material)
     {
         $material->update(['is_approved' => true]);
@@ -128,6 +135,12 @@ class AdminController extends Controller
         return view('admin.courses.index', compact('courses', 'lecturers'));
     }
 
+    public function editCourse(Course $course)
+    {
+        $lecturers = Lecturer::all();
+        return view('admin.courses.edit', compact('course', 'lecturers'));
+    }
+
     public function storeCourse(Request $request)
     {
         $request->validate([
@@ -145,15 +158,16 @@ class AdminController extends Controller
 
     public function updateCourse(Request $request, Course $course)
     {
-        $request->validate([
+        $validated = $request->validate([
             'course_code' => 'required|string|unique:courses,course_code,' . $course->id,
             'course_title' => 'required|string',
             'level' => 'required|in:100,200,300,400',
             'semester' => 'required|in:first,second',
             'credits' => 'required|integer|min:1|max:6',
+            'lecturer_id' => 'nullable|exists:lecturers,id',
         ]);
 
-        $course->update($request->all());
+        $course->update($validated);
         return back()->with('success', 'Course updated.');
     }
 
@@ -181,6 +195,19 @@ class AdminController extends Controller
 
         Lecturer::create($request->all());
         return back()->with('success', 'Lecturer added.');
+    }
+
+    public function updateLecturer(Request $request, Lecturer $lecturer)
+    {
+        $request->validate([
+            'name' => 'required|string',
+            'title' => 'nullable|string',
+            'email' => 'nullable|email|unique:lecturers,email,' . $lecturer->id,
+            'department' => 'required|string',
+        ]);
+
+        $lecturer->update($request->all());
+        return back()->with('success', 'Lecturer updated.');
     }
 
     public function deleteLecturer(Lecturer $lecturer)

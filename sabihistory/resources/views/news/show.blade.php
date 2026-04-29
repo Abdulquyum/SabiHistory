@@ -32,9 +32,29 @@
             </div>
 
             <!-- Featured Image -->
-            @if($news->image_url)
+            @if($news->attachment_type === 'image' && $news->attachment_path)
+                <div class="my-8 rounded-lg overflow-hidden shadow-md">
+                    <img src="{{ asset('storage/' . $news->attachment_path) }}" alt="{{ $news->title }}" class="w-full h-auto object-cover">
+                </div>
+            @elseif($news->image_url)
                 <div class="my-8 rounded-lg overflow-hidden shadow-md">
                     <img src="{{ $news->image_url }}" alt="{{ $news->title }}" class="w-full h-auto object-cover">
+                </div>
+            @endif
+
+            @if($news->attachment_type === 'pdf' && $news->attachment_path)
+                <div class="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg space-y-3">
+                    <a href="{{ asset('storage/' . $news->attachment_path) }}" target="_blank" class="inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-medium">
+                        <i class="fas fa-file-pdf"></i>
+                        Open attached PDF
+                    </a>
+                    <div class="rounded-lg overflow-hidden border border-red-200 bg-white">
+                        <iframe
+                            src="{{ asset('storage/' . $news->attachment_path) }}#toolbar=1&navpanes=0"
+                            class="w-full h-[560px]"
+                            title="PDF Preview"
+                        ></iframe>
+                    </div>
                 </div>
             @endif
 

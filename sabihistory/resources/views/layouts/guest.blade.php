@@ -41,7 +41,7 @@
                     <!-- Footer -->
                     <div class="px-8 py-4 bg-gray-50 border-t border-gray-200">
                         <p class="text-center text-sm text-gray-600">
-                            SabiHistory © {{ date('Y') }}
+                            Prof Coy 2026
                         </p>
                     </div>
                 </div>
