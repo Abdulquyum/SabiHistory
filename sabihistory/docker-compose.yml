@@ -1,0 +1,50 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    container_name: sabihistory_app
+    volumes:
+      - .:/var/www
+    networks:
+      - sabihistory_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: sabihistory_web
+    ports:
+      - "80:80"
+    volumes:
+      - .:/var/www
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - sabihistory_network
+
+  db:
+    image: mysql:8.0
+    container_name: sabihistory_db
+    environment:
+      MYSQL_DATABASE: sabihistory
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - sabihistory_network
+
+  scheduler:
+    build: .
+    container_name: sabihistory_scheduler
+    command: php artisan schedule:work
+    volumes:
+      - .:/var/www
+    depends_on:
+      - app
+    networks:
+      - sabihistory_network
+
+networks:
+  sabihistory_network:
+
+volumes:
+  db_data:
