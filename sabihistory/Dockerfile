@@ -1,21 +1,18 @@
-FROM php:8.2-fpm
+# Build stage
+FROM composer:2.8 as composer
 
-RUN apt-get update && apt-get install -y \
-    libpng-dev libjpeg-dev libfreetype6-dev zip unzip git cron
+FROM php:8.3-fpm-alpine as app
 
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-RUN docker-php-ext-install gd pdo pdo_mysql
+RUN docker-php-ext-install pdo pdo_mysql
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+WORKDIR /var/www/html
 
-WORKDIR /var/www
+# Copy the application code
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader
-RUN php artisan config:cache
-RUN php artisan route:cache
-RUN php artisan view:cache
+# Install PHP dependencies from composer.json
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+RUN composer install --no-interaction --optimize-autoloader --no-dev
 
-RUN echo "* * * * * cd /var/www && php artisan schedule:run >> /dev/null 2>&1" | crontab -
-
-CMD ["php-fpm"]
+ENV PORT=8000
+ENTRYPOINT [ "sh", "-c", "php artisan migrate --force && php artisan optimize:clear && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan storage:link && php artisan serve --host=0.0.0.0 --port=${PORT}" ]
