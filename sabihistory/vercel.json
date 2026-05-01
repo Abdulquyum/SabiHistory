@@ -1,7 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "buildCommand": "composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader && npm ci && npm run build",
   "functions": {
     "api/**/*.php": {
       "runtime": "vercel-php@0.7.4"
