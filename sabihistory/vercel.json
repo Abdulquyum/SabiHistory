@@ -3,14 +3,14 @@
   "version": 2,
   "buildCommand": "composer install --no-interaction --no-dev --prefer-dist --optimize-autoloader && npm ci && npm run build",
   "functions": {
-    "public/**/*.php": {
+    "api/**/*.php": {
       "runtime": "vercel-php@0.7.4"
     }
   },
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/public/index.php"
+      "destination": "/api/index.php"
     }
   ]
 }
