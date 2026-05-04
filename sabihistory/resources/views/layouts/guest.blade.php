@@ -7,16 +7,10 @@
 
         <title>{{ config('app.name', 'Laravel') }} - Authentication</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-
-        <!-- Scripts -->
-        <script src="https://cdn.tailwindcss.com"></script>
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-100">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 px-4">
+    <body class="bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-100 text-slate-900 antialiased">
+        <div class="relative min-h-screen px-4 pt-6 sm:flex sm:items-center sm:justify-center sm:pt-0">
             <!-- Logo & Brand -->
             <div class="mb-8 text-center">
                 <a href="/" class="inline-flex flex-col items-center">
@@ -30,16 +24,16 @@
 
             <!-- Auth Card -->
             <div class="w-full sm:max-w-md">
-                <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <div class="overflow-hidden rounded-2xl bg-white shadow-2xl">
                     <!-- Header Gradient -->
                     <div class="bg-gradient-to-r from-blue-600 to-indigo-600 h-2"></div>
                     
-                    <div class="px-8 py-8">
+                    <div class="px-6 py-7 sm:px-8">
                         {{ $slot }}
                     </div>
 
                     <!-- Footer -->
-                    <div class="px-8 py-4 bg-gray-50 border-t border-gray-200">
+                    <div class="border-t border-gray-200 bg-gray-50 px-6 py-4 sm:px-8">
                         <p class="text-center text-sm text-gray-600">
                             Prof Coy 2026
                         </p>
@@ -48,8 +42,8 @@
             </div>
 
             <!-- Decorative elements -->
-            <div class="absolute top-10 left-10 w-20 h-20 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
-            <div class="absolute bottom-10 right-10 w-32 h-32 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+            <div class="pointer-events-none absolute top-10 left-10 hidden h-20 w-20 rounded-full bg-blue-200 opacity-70 mix-blend-multiply blur-xl animate-pulse sm:block"></div>
+            <div class="pointer-events-none absolute bottom-10 right-10 hidden h-32 w-32 rounded-full bg-indigo-200 opacity-70 mix-blend-multiply blur-xl animate-pulse sm:block"></div>
         </div>
     </body>
 </html>

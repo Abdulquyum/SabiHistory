@@ -4,8 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SabiHistory - History & Strategic Studies Hub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         .hero-glow { background: radial-gradient(circle at top, rgba(59,130,246,.20), transparent 38%), radial-gradient(circle at bottom right, rgba(99,102,241,.22), transparent 28%); }
         .lift { transition: transform .25s ease, box-shadow .25s ease; }

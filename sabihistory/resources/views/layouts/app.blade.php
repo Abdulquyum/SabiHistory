@@ -5,175 +5,159 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>SabiHistory - @yield('title', 'History & Strategic Studies Hub')</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         [x-cloak] { display: none !important; }
-        .sidebar { transition: transform 0.3s ease; }
-        @media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } }
-        .nav-link { transition: all 0.3s ease; }
-        .nav-link:hover { background: rgba(59, 130, 246, 0.1); padding-left: 1.5rem; }
-        .nav-link.active { background: rgba(59, 130, 246, 0.15); border-left: 4px solid rgb(59, 130, 246); }
+        .nav-link { transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease; }
+        .nav-link:hover { background: rgba(59, 130, 246, 0.08); transform: translateX(2px); }
+        .nav-link.active { background: rgba(59, 130, 246, 0.12); border-left: 4px solid rgb(59, 130, 246); padding-left: calc(0.75rem - 4px); }
     </style>
     @stack('styles')
 </head>
-<body class="bg-gray-50">
-    <!-- Top Navigation -->
-    <nav class="bg-white shadow-md border-b-2 border-blue-600 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <!-- Logo & Brand -->
-                <div class="flex items-center gap-3">
-                    <button id="sidebarToggle" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-600">
-                        <i class="fas fa-bars text-xl"></i>
-                    </button>
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2 hover:opacity-80 transition">
-                        <div class="bg-gradient-to-br from-blue-600 to-indigo-600 p-2 rounded-lg shadow-lg">
-                            <i class="fas fa-book-open text-white text-lg"></i>
-                        </div>
-                        <div class="hidden sm:block">
-                            <span class="font-bold text-lg text-gray-900">SabiHistory</span>
-                            <p class="text-xs text-gray-500">{{ Auth::user()->is_admin ? 'Admin Panel' : 'Learning Hub' }}</p>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Search & Actions -->
-                <div class="flex items-center gap-4">
-                    @auth
-                        <form action="{{ route('materials.index') }}" method="GET" class="hidden md:flex items-center">
-                            <div class="relative">
-                                <input type="text" name="search" placeholder="Search materials..." class="pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
-                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                            </div>
-                        </form>
-
-                        <!-- User Menu -->
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 focus:outline-none">
-                                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg">
-                                    {{ substr(Auth::user()->name, 0, 1) }}
-                                </div>
-                                <div class="hidden md:block text-left">
-                                    <p class="text-sm font-semibold text-gray-900">{{ Auth::user()->name }}</p>
-                                    <p class="text-xs text-gray-500">{{ Auth::user()->is_admin ? 'Administrator' : 'Student' }}</p>
-                                </div>
-                                <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+<body class="bg-slate-100 text-slate-900 antialiased">
+    <div x-data="{ sidebarOpen: false, userMenuOpen: false }" class="min-h-screen">
+        <nav class="sticky top-0 z-50 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col gap-3 py-3 lg:flex-row lg:h-16 lg:items-center lg:justify-between lg:py-0">
+                    <div class="flex items-center justify-between gap-3 lg:justify-start">
+                        <div class="flex items-center gap-3">
+                            <button type="button" @click="sidebarOpen = true" class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 lg:hidden" aria-label="Open navigation menu">
+                                <i class="fas fa-bars text-lg"></i>
                             </button>
-                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl z-50 border border-gray-200 overflow-hidden">
-                                <div class="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
-                                    <p class="text-sm font-semibold text-gray-900">{{ Auth::user()->name }}</p>
-                                    <p class="text-xs text-gray-500">{{ Auth::user()->email }}</p>
+                            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 transition hover:opacity-80">
+                                <div class="rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 p-2.5 shadow-lg shadow-blue-600/20">
+                                    <i class="fas fa-book-open text-base text-white"></i>
                                 </div>
-                                <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition"><i class="fas fa-tachometer-alt mr-2 text-blue-600"></i> Dashboard</a>
-                                <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition"><i class="fas fa-user-circle mr-2 text-green-600"></i> Profile</a>
-                                @auth
-                                    @if(Auth::user()->is_admin)
-                                        <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition border-t border-gray-200"><i class="fas fa-crown mr-2 text-yellow-600"></i> Admin Panel</a>
-                                    @endif
-                                @endauth
-                                <form method="POST" action="{{ route('logout') }}" class="border-t border-gray-200">
-                                    @csrf
-                                    <button type="submit" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 transition"><i class="fas fa-sign-out-alt mr-2 text-red-600"></i> Logout</button>
-                                </form>
-                            </div>
+                                <div class="hidden sm:block">
+                                    <span class="block text-lg font-bold text-slate-900">SabiHistory</span>
+                                    <p class="text-xs text-slate-500">{{ Auth::user()->is_admin ? 'Admin Panel' : 'Learning Hub' }}</p>
+                                </div>
+                            </a>
                         </div>
-                    @else
-                        <a href="{{ route('login') }}" class="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium">Login</a>
-                        <a href="{{ route('register') }}" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:shadow-lg transition">Register</a>
-                    @endauth
+
+                        @auth
+                            <div class="sm:hidden">
+                                <button type="button" @click="userMenuOpen = !userMenuOpen" class="inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100" aria-label="Open account menu">
+                                    <i class="fas fa-ellipsis-vertical"></i>
+                                </button>
+                            </div>
+                        @endauth
+                    </div>
+
+                    <div class="flex items-center gap-3 sm:gap-4 lg:justify-end">
+                        @auth
+                            <form action="{{ route('materials.index') }}" method="GET" class="hidden lg:block">
+                                <label class="relative block">
+                                    <span class="sr-only">Search materials</span>
+                                    <input type="text" name="search" placeholder="Search materials..." class="w-72 rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10">
+                                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                </label>
+                            </form>
+
+                            <div class="relative ml-auto hidden sm:block" @click.outside="userMenuOpen = false">
+                                <button @click="userMenuOpen = !userMenuOpen" class="flex items-center gap-2 rounded-xl p-2 hover:bg-slate-100 focus:outline-none focus:ring-4 focus:ring-blue-500/10">
+                                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 font-bold text-white shadow-lg shadow-blue-600/20">
+                                        {{ substr(Auth::user()->name, 0, 1) }}
+                                    </div>
+                                    <div class="hidden md:block text-left">
+                                        <p class="text-sm font-semibold text-slate-900">{{ Auth::user()->name }}</p>
+                                        <p class="text-xs text-slate-500">{{ Auth::user()->is_admin ? 'Administrator' : 'Student' }}</p>
+                                    </div>
+                                    <i class="fas fa-chevron-down text-xs text-slate-500"></i>
+                                </button>
+                                <div x-cloak x-show="userMenuOpen" x-transition class="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
+                                    <div class="border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3">
+                                        <p class="text-sm font-semibold text-slate-900">{{ Auth::user()->name }}</p>
+                                        <p class="text-xs text-slate-500">{{ Auth::user()->email }}</p>
+                                    </div>
+                                    <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-slate-700 transition hover:bg-slate-50"><i class="fas fa-tachometer-alt mr-2 text-blue-600"></i> Dashboard</a>
+                                    <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-slate-700 transition hover:bg-slate-50"><i class="fas fa-user-circle mr-2 text-emerald-600"></i> Profile</a>
+                                    @if(Auth::user()->is_admin)
+                                        <a href="{{ route('admin.dashboard') }}" class="block border-t border-slate-200 px-4 py-2 text-slate-700 transition hover:bg-slate-50"><i class="fas fa-crown mr-2 text-amber-500"></i> Admin Panel</a>
+                                    @endif
+                                    <form method="POST" action="{{ route('logout') }}" class="border-t border-slate-200">
+                                        @csrf
+                                        <button type="submit" class="w-full px-4 py-2 text-left text-slate-700 transition hover:bg-slate-50"><i class="fas fa-sign-out-alt mr-2 text-red-600"></i> Logout</button>
+                                    </form>
+                                </div>
+                            </div>
+                        @else
+                            <a href="{{ route('login') }}" class="rounded-xl px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">Login</a>
+                            <a href="{{ route('register') }}" class="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:from-blue-700 hover:to-indigo-700">Register</a>
+                        @endauth
+                    </div>
                 </div>
             </div>
+        </nav>
+
+        <div class="lg:flex">
+            <div x-cloak x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-40 bg-slate-900/40 lg:hidden" @click="sidebarOpen = false"></div>
+
+            <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-[85vw] max-w-xs -translate-x-full overflow-y-auto border-r border-slate-200 bg-white shadow-2xl shadow-slate-900/10 transition-transform duration-300 lg:sticky lg:top-16 lg:z-30 lg:block lg:h-[calc(100vh-4rem)] lg:w-72 lg:max-w-none lg:translate-x-0 lg:shadow-lg" :class="sidebarOpen ? 'translate-x-0' : ''">
+                <div class="p-4 sm:p-5">
+                    <div class="mb-8">
+                        <h3 class="px-2 text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Navigation</h3>
+                        <ul class="mt-3 space-y-1">
+                            <li><a @click="sidebarOpen = false" href="{{ route('dashboard') }}" class="nav-link block rounded-xl px-3 py-2.5 text-slate-700 {{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home mr-2 text-blue-600"></i> Dashboard</a></li>
+                            <li><a @click="sidebarOpen = false" href="{{ route('materials.index') }}" class="nav-link block rounded-xl px-3 py-2.5 text-slate-700"><i class="fas fa-file-alt mr-2 text-emerald-600"></i> Materials</a></li>
+                            <li><a @click="sidebarOpen = false" href="{{ route('past-questions.index') }}" class="nav-link block rounded-xl px-3 py-2.5 text-slate-700"><i class="fas fa-question-circle mr-2 text-violet-600"></i> Past Questions</a></li>
+                            <li><a @click="sidebarOpen = false" href="{{ route('lecturers.index') }}" class="nav-link block rounded-xl px-3 py-2.5 text-slate-700"><i class="fas fa-chalkboard-user mr-2 text-orange-600"></i> Lecturers</a></li>
+                            <li><a @click="sidebarOpen = false" href="{{ route('news.index') }}" class="nav-link block rounded-xl px-3 py-2.5 text-slate-700"><i class="fas fa-newspaper mr-2 text-red-600"></i> News</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="px-2 text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Resources</h3>
+                        <ul class="mt-3 space-y-1">
+                            <li><a @click="sidebarOpen = false" href="{{ route('links') }}" class="nav-link block rounded-xl px-3 py-2.5 text-slate-700"><i class="fas fa-link mr-2 text-indigo-600"></i> Quick Links</a></li>
+                            <li><a @click="sidebarOpen = false" href="{{ route('projects.index') }}" class="nav-link block rounded-xl px-3 py-2.5 text-slate-700"><i class="fas fa-graduation-cap mr-2 text-pink-600"></i> Final Year Projects</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="px-2 text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Course Levels</h3>
+                        <ul class="mt-3 space-y-1">
+                            @foreach([100,200,300,400] as $level)
+                                <li><a @click="sidebarOpen = false" href="{{ route('materials.index', ['level' => $level]) }}" class="block rounded-xl px-3 py-2.5 text-sm text-slate-600 transition hover:bg-blue-50 hover:text-blue-700"><i class="fas fa-layer-group mr-2 text-slate-400"></i> Level {{ $level }}</a></li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+                @isset($header)
+                    <div class="mb-6">
+                        {{ $header }}
+                    </div>
+                @endisset
+
+                @if(session('success'))
+                    <div class="mb-4 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-800 shadow-sm">
+                        <i class="fas fa-check-circle text-lg"></i>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                @endif
+                @if(session('error'))
+                    <div class="mb-4 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-800 shadow-sm">
+                        <i class="fas fa-exclamation-circle text-lg"></i>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                @endif
+
+                @isset($slot)
+                    {{ $slot }}
+                @else
+                    @yield('content')
+                @endisset
+
+                <footer class="mt-8 border-t border-slate-200 pt-4">
+                    <p class="text-center text-sm text-slate-500">Prof Coy 2026</p>
+                </footer>
+            </main>
         </div>
-    </nav>
-
-    <div class="flex">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar w-64 bg-white shadow-lg h-[calc(100vh-64px)] sticky top-16 overflow-y-auto border-r-2 border-gray-200 z-30">
-            <div class="p-4">
-                <!-- Main Navigation -->
-                <div class="mb-8">
-                    <h3 class="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wide px-2">Navigation</h3>
-                    <ul class="space-y-1">
-                        <li><a href="{{ route('dashboard') }}" class="nav-link block py-2 px-3 rounded-lg text-gray-700 {{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home mr-2 text-blue-600"></i> Dashboard</a></li>
-                        <li><a href="{{ route('materials.index') }}" class="nav-link block py-2 px-3 rounded-lg text-gray-700"><i class="fas fa-file-alt mr-2 text-green-600"></i> Materials</a></li>
-                        <li><a href="{{ route('past-questions.index') }}" class="nav-link block py-2 px-3 rounded-lg text-gray-700"><i class="fas fa-question-circle mr-2 text-purple-600"></i> Past Questions</a></li>
-                        <li><a href="{{ route('lecturers.index') }}" class="nav-link block py-2 px-3 rounded-lg text-gray-700"><i class="fas fa-chalkboard-user mr-2 text-orange-600"></i> Lecturers</a></li>
-                        <li><a href="{{ route('news.index') }}" class="nav-link block py-2 px-3 rounded-lg text-gray-700"><i class="fas fa-newspaper mr-2 text-red-600"></i> News</a></li>
-                    </ul>
-                </div>
-
-                <!-- Resources -->
-                <div class="mb-8">
-                    <h3 class="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wide px-2">Resources</h3>
-                    <ul class="space-y-1">
-                        <li><a href="{{ route('links') }}" class="nav-link block py-2 px-3 rounded-lg text-gray-700"><i class="fas fa-link mr-2 text-indigo-600"></i> Quick Links</a></li>
-                        <li><a href="{{ route('projects.index') }}" class="nav-link block py-2 px-3 rounded-lg text-gray-700"><i class="fas fa-graduation-cap mr-2 text-pink-600"></i> Final Year Projects</a></li>
-                    </ul>
-                </div>
-
-                <!-- Level Filter -->
-                <div>
-                    <h3 class="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wide px-2">Course Levels</h3>
-                    <ul class="space-y-1">
-                        @foreach([100,200,300,400] as $level)
-                            <li><a href="{{ route('materials.index', ['level' => $level]) }}" class="block py-2 px-3 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition"><i class="fas fa-layer-group mr-2"></i> Level {{ $level }}</a></li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="flex-1 p-6 overflow-y-auto">
-            @isset($header)
-                <div class="mb-6">
-                    {{ $header }}
-                </div>
-            @endisset
-
-            <!-- Success/Error Messages -->
-            @if(session('success'))
-                <div class="mb-4 p-4 bg-green-50 border border-green-300 text-green-800 rounded-lg flex items-center gap-3 animate-slide-down">
-                    <i class="fas fa-check-circle text-lg"></i>
-                    <span>{{ session('success') }}</span>
-                </div>
-            @endif
-            @if(session('error'))
-                <div class="mb-4 p-4 bg-red-50 border border-red-300 text-red-800 rounded-lg flex items-center gap-3 animate-slide-down">
-                    <i class="fas fa-exclamation-circle text-lg"></i>
-                    <span>{{ session('error') }}</span>
-                </div>
-            @endif
-            
-            <!-- Page Content -->
-            @isset($slot)
-                {{ $slot }}
-            @else
-                @yield('content')
-            @endisset
-
-            <footer class="mt-8 pt-4 border-t border-gray-200">
-                <p class="text-center text-sm text-gray-500">Prof Coy 2026</p>
-            </footer>
-        </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <script>
-        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('open');
-        });
-        
-        // Close sidebar on small screens when a link is clicked
-        document.querySelectorAll('.sidebar a').forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth < 1024) {
-                    document.getElementById('sidebar').classList.remove('open');
-                }
-            });
-        });
-    </script>
     @stack('scripts')
 </body>
 </html>
