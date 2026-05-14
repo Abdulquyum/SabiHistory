@@ -1,27 +1,45 @@
-# Use the richarvey/nginx-php-fpm image (includes php8.2-fpm and nginx)[reference:0]
-FROM richarvey/nginx-php-fpm:latest
+# Use the official PHP 8.3 FPM image as the base
+FROM php:8.3-fpm-alpine AS base
 
-# Copy the entire application into the container
+# Install system dependencies and the Nginx web server
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    curl \
+    libpng-dev \
+    libzip-dev \
+    oniguruma-dev \
+    && docker-php-ext-install pdo_mysql mbstring zip gd
+
+# Copy Composer from its official image
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set the working directory
+WORKDIR /var/www/html
+
+# Copy the application code
 COPY . .
 
-# Configure nginx to serve from the public directory
-ENV WEBROOT /var/www/html/public
+# Create a start script
+RUN echo '#!/bin/sh' > /start.sh && \
+    echo 'composer install --no-interaction --optimize-autoloader --no-dev' >> /start.sh && \
+    echo 'php artisan key:generate --force' >> /start.sh && \
+    echo 'php artisan migrate --force' >> /start.sh && \
+    echo 'php artisan config:cache' >> /start.sh && \
+    echo 'php artisan route:cache' >> /start.sh && \
+    echo 'php artisan view:cache' >> /start.sh && \
+    echo 'php artisan storage:link' >> /start.sh && \
+    echo 'mkdir -p /run/nginx' >> /start.sh && \
+    echo 'supervisord -c /etc/supervisord.conf' >> /start.sh && \
+    chmod +x /start.sh
 
-# Optimize Laravel for stderr logging – great for Render log streaming
-ENV LOG_CHANNEL stderr
+# Copy Nginx configuration file
+COPY nginx.conf /etc/nginx/http.d/default.conf
 
-# Disable the built‑in composer run; we run it ourselves in the start script
-ENV SKIP_COMPOSER 1
+# Copy Supervisor configuration file
+COPY supervisord.conf /etc/supervisord.conf
 
-# General container optimizations
-ENV RUN_SCRIPTS 1
-ENV REAL_IP_HEADER 1
+# Expose port 80
+EXPOSE 80
 
-# Laravel environment (overridden by Render Environment Variables)
-ENV APP_ENV production
-ENV APP_DEBUG false
-
-# Allow composer to run as root inside the container
-ENV COMPOSER_ALLOW_SUPERUSER 1
-
-# CMD is provided by the base image – it starts nginx and php-fpm
+CMD ["/start.sh"]
