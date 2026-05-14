@@ -1,6 +1,5 @@
 node_modules
 .git
 .env
-vendor
 storage/app/public/*
 bootstrap/cache/*.php
