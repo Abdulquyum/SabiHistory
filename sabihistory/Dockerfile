@@ -7,16 +7,6 @@ RUN apk add --no-cache nginx supervisor \
     libpq-dev \
     && docker-php-ext-install pdo_mysql mbstring zip gd pdo_pgsql
 
-# Install system dependencies and the Nginx web server
-RUN apk add --no-cache \
-    nginx \
-    supervisor \
-    curl \
-    libpng-dev \
-    libzip-dev \
-    oniguruma-dev \
-    && docker-php-ext-install pdo_mysql mbstring zip gd
-
 # Copy Composer from its official image
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
