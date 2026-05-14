@@ -1,10 +1,12 @@
 # Use the official PHP 8.3 FPM image as the base
 FROM php:8.3-fpm-alpine AS base
 
-# Install system dependencies, nginx, and PostgreSQL client
+# Install system dependencies, nginx, PostgreSQL client, and required dev libraries
 RUN apk add --no-cache nginx supervisor \
     postgresql-client \
     libpq-dev \
+    oniguruma-dev \
+    libzip-dev \
     && docker-php-ext-install pdo_mysql mbstring zip gd pdo_pgsql
 
 # Copy Composer from its official image
