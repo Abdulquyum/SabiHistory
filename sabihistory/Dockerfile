@@ -1,6 +1,12 @@
 # Use the official PHP 8.3 FPM image as the base
 FROM php:8.3-fpm-alpine AS base
 
+# Install system dependencies, nginx, and PostgreSQL client
+RUN apk add --no-cache nginx supervisor \
+    postgresql-client \
+    libpq-dev \
+    && docker-php-ext-install pdo_mysql mbstring zip gd pdo_pgsql
+
 # Install system dependencies and the Nginx web server
 RUN apk add --no-cache \
     nginx \
