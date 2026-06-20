@@ -12,7 +12,6 @@ services:
       DB_CONNECTION: sqlite
     volumes:
       - ./:/var/www/html
-      - /var/www/html/vendor
     networks:
       - sabihistory-network
 
@@ -42,8 +41,8 @@ services:
       DB_CONNECTION: sqlite
     volumes:
       - ./:/var/www/html
-    entrypoint: ["/bin/sh", "-c"]
-    command: ["while true; do php artisan schedule:run --verbose --no-interaction & sleep 60; done"]
+    entrypoint: ["/usr/local/bin/docker-entrypoint.sh"]
+    command: ["/bin/sh", "-c", "while true; do php artisan schedule:run --verbose --no-interaction & sleep 60; done"]
     depends_on:
       - app
     networks:

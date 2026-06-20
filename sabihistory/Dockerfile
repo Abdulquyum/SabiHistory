@@ -2,7 +2,7 @@
 FROM php:8.3-fpm-alpine AS app
 
 # Install system dependencies, nginx, and required dev libraries
-RUN apk add --no-cache nginx supervisor \
+RUN apk add --no-cache nginx supervisor git unzip \
     && apk add --no-cache --virtual .build-deps \
         $PHPIZE_DEPS \
         freetype-dev \
@@ -16,33 +16,32 @@ RUN apk add --no-cache nginx supervisor \
 # Copy Composer from its official image
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set the working directory
 WORKDIR /var/www/html
 
-# Copy the application code
+# Install PHP dependencies (cached layer when composer files unchanged)
+COPY composer.json composer.lock* ./
+RUN composer install --no-interaction --optimize-autoloader --no-dev --no-scripts
+
 COPY . .
 
-# Create a start script
+RUN composer dump-autoload --optimize --no-interaction
+
+COPY .docker/entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Copy Nginx configuration file (for single-container deploy)
+COPY nginx.conf /etc/nginx/http.d/default.conf
+
+# Copy Supervisor configuration file (for single-container deploy)
+COPY supervisord.conf /etc/supervisord.conf
+
+# Create a start script for single-container deploy (nginx + php-fpm)
 RUN echo '#!/bin/sh' > /start.sh && \
-    echo 'composer install --no-interaction --optimize-autoloader --no-dev' >> /start.sh && \
-    echo 'php artisan key:generate --force' >> /start.sh && \
-    echo 'mkdir -p database && touch database/database.sqlite' >> /start.sh && \
-    echo 'php artisan migrate --force' >> /start.sh && \
-    echo 'php artisan config:cache' >> /start.sh && \
-    echo 'php artisan route:cache' >> /start.sh && \
-    echo 'php artisan view:cache' >> /start.sh && \
-    echo 'php artisan storage:link' >> /start.sh && \
     echo 'mkdir -p /run/nginx' >> /start.sh && \
     echo 'supervisord -c /etc/supervisord.conf' >> /start.sh && \
     chmod +x /start.sh
 
-# Copy Nginx configuration file
-COPY nginx.conf /etc/nginx/http.d/default.conf
+EXPOSE 80 9000
 
-# Copy Supervisor configuration file
-COPY supervisord.conf /etc/supervisord.conf
-
-# Expose port 80
-EXPOSE 80
-
-CMD ["/start.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["php-fpm"]
