@@ -8,6 +8,8 @@ services:
     container_name: sabihistory-app
     restart: unless-stopped
     working_dir: /var/www/html
+    environment:
+      DB_CONNECTION: sqlite
     volumes:
       - ./:/var/www/html
       - /var/www/html/vendor
@@ -28,18 +30,6 @@ services:
     networks:
       - sabihistory-network
 
-  db:
-    image: mysql:8.0
-    container_name: sabihistory-db
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: sabihistory
-      MYSQL_ROOT_PASSWORD: root
-    volumes:
-      - db_data:/var/lib/mysql
-    networks:
-      - sabihistory-network
-
   scheduler:
     build:
       context: .
@@ -48,6 +38,8 @@ services:
     container_name: sabihistory-scheduler
     restart: unless-stopped
     working_dir: /var/www/html
+    environment:
+      DB_CONNECTION: sqlite
     volumes:
       - ./:/var/www/html
     entrypoint: ["/bin/sh", "-c"]
@@ -60,6 +52,3 @@ services:
 networks:
   sabihistory-network:
     driver: bridge
-
-volumes:
-  db_data:

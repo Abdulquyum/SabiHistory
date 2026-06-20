@@ -9,6 +9,10 @@ php artisan config:cache
 echo "Caching Laravel routes"
 php artisan route:cache
 
+echo "Preparing SQLite database"
+mkdir -p database
+touch database/database.sqlite
+
 echo "Running database migrations"
 php artisan migrate --force
 

@@ -1,13 +1,11 @@
 # Use the official PHP 8.3 FPM image as the base
-FROM php:8.3-fpm-alpine AS base
+FROM php:8.3-fpm-alpine AS app
 
-# Install system dependencies, nginx, PostgreSQL client, and required dev libraries
+# Install system dependencies, nginx, and required dev libraries
 RUN apk add --no-cache nginx supervisor \
-    postgresql-client \
-    libpq-dev \
     oniguruma-dev \
     libzip-dev \
-    && docker-php-ext-install pdo_mysql mbstring zip gd pdo_pgsql
+    && docker-php-ext-install mbstring zip gd
 
 # Copy Composer from its official image
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -22,6 +20,7 @@ COPY . .
 RUN echo '#!/bin/sh' > /start.sh && \
     echo 'composer install --no-interaction --optimize-autoloader --no-dev' >> /start.sh && \
     echo 'php artisan key:generate --force' >> /start.sh && \
+    echo 'mkdir -p database && touch database/database.sqlite' >> /start.sh && \
     echo 'php artisan migrate --force' >> /start.sh && \
     echo 'php artisan config:cache' >> /start.sh && \
     echo 'php artisan route:cache' >> /start.sh && \
