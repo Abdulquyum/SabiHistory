@@ -1,3 +1,0 @@
-$user = App\Models\User::create([    'name' => 'Super Admin',    'email' => 'admin@sabihi
-story.com',    'password' => bcrypt('admin123'),    'is_admin' => true,    'role' => 'admin
-',    'level' => 400]);
