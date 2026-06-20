@@ -1,17 +1,30 @@
 # Use the official PHP 8.3 FPM image as the base
 FROM php:8.3-fpm-alpine AS app
 
-# Install system dependencies, nginx, and required dev libraries
-RUN apk add --no-cache nginx supervisor git unzip \
+# Runtime packages (must stay after build-deps are removed)
+RUN apk add --no-cache \
+        nginx \
+        supervisor \
+        git \
+        unzip \
+        libzip \
+        icu-libs \
     && apk add --no-cache --virtual .build-deps \
         $PHPIZE_DEPS \
         freetype-dev \
         libjpeg-turbo-dev \
         libpng-dev \
         libzip-dev \
+        icu-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j"$(nproc)" gd zip \
+    && docker-php-ext-install -j"$(nproc)" \
+        bcmath \
+        gd \
+        intl \
+        zip \
     && apk del .build-deps
+
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # Copy Composer from its official image
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -24,7 +37,7 @@ RUN composer install --no-interaction --optimize-autoloader --no-dev --no-script
 
 COPY . .
 
-RUN composer dump-autoload --optimize --no-interaction
+RUN composer dump-autoload --optimize --no-interaction --no-dev
 
 COPY .docker/entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
