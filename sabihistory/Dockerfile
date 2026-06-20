@@ -3,9 +3,15 @@ FROM php:8.3-fpm-alpine AS app
 
 # Install system dependencies, nginx, and required dev libraries
 RUN apk add --no-cache nginx supervisor \
-    oniguruma-dev \
-    libzip-dev \
-    && docker-php-ext-install mbstring zip gd
+    && apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
+        freetype-dev \
+        libjpeg-turbo-dev \
+        libpng-dev \
+        libzip-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j"$(nproc)" gd zip \
+    && apk del .build-deps
 
 # Copy Composer from its official image
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
