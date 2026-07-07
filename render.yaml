@@ -12,10 +12,11 @@ services:
     # Commands to build your application
     buildCommand: |
       # 1. Install system dependencies required by PHP extensions (like gd and zip)
-      apt-get update && apt-get install -y libpng-dev libzip-dev && docker-php-ext-install zip
+      apt-get update && apt-get install -y libpng-dev libzip-dev
+      docker-php-ext-install gd zip
 
       # 2. Install Composer dependencies for production
-      composer install --no-interaction --no-dev --prefer-dist
+      composer install --no-interaction --no-dev --prefer-dist --no-scripts
 
       # 3. Generate the application key (important for production)
       php artisan key:generate --force
@@ -39,7 +40,10 @@ services:
         generateValue: true # Let Render generate a secure key
       - key: SESSION_ENCRYPT
         value: true
-      # Link to the environment group containing database credentials
+      # Enable required PHP extensions
+      - key: RENDER_PHP_EXTENSIONS
+        value: "gd zip"
+      # Link to the environment group containing database credentials.
       - fromGroup: sabihistory-db-credentials
 
   # Database Service (PostgreSQL in this example)
