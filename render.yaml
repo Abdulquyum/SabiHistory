@@ -28,6 +28,11 @@ services:
       php artisan migrate --force
     # Command to start the web server (Apache + PHP-FPM)
     startCommand: heroku-php-apache2 public/
+    # Add a persistent disk for storage
+    disks:
+      - name: sabihistory-storage
+        mountPath: /var/www/html/storage
+        sizeGB: 1
     # Environment variables for the web service
     envVars:
       - key: APP_URL
