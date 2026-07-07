@@ -1,22 +1,10 @@
 services:
   - type: web
     name: sabihistory-web
-    env: php
-    plan: free
+    runtime: docker
+    plan: starter # disks require a paid plan; free tier can't attach one
     region: oregon
-    buildCommand: |
-      # 1. Install system dependencies required by PHP extensions (like gd and zip)
-      apt-get update && apt-get install -y libpng-dev libzip-dev
-      docker-php-ext-install gd zip
-      # 2. Install Composer dependencies for production
-      composer install --no-interaction --no-dev --prefer-dist --no-scripts
-      # 3. Generate the application key (important for production)
-      php artisan key:generate --force
-      # 4. Link the public storage directory
-      php artisan storage:link
-      # 5. Run database migrations automatically on deploy
-      php artisan migrate --force
-    startCommand: heroku-php-apache2 public/
+    dockerfilePath: ./Dockerfile
     disk:
       name: sabihistory-storage
       mountPath: /var/www/html/storage
