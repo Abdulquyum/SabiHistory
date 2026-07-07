@@ -49,7 +49,6 @@ services:
   # Database Service (PostgreSQL in this example)
   - type: psql
     name: sabihistory-db
-    env: postgres
     plan: free
     region: oregon
     # Set the major version of PostgreSQL you want to use
