@@ -1,60 +1,52 @@
-# Use the official PHP 8.3 FPM image as the base
-FROM php:8.3-fpm-alpine AS app
+FROM php:8.2-apache
 
-# Runtime packages (must stay after build-deps are removed)
-RUN apk add --no-cache \
-        nginx \
-        supervisor \
-        git \
-        unzip \
-        libzip \
-        icu-libs \
-    && apk add --no-cache --virtual .build-deps \
-        $PHPIZE_DEPS \
-        freetype-dev \
-        libjpeg-turbo-dev \
-        libpng-dev \
-        libzip-dev \
-        icu-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j"$(nproc)" \
-        bcmath \
-        gd \
-        intl \
-        zip \
-    && apk del .build-deps
+# Install system deps, PHP extensions, Node.js, and Composer
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    git \
+    zip \
+    unzip \
+    libpng-dev \
+    libonig-dev \
+    libzip-dev \
+    sqlite3 \
+    libsqlite3-dev \
+    curl \
+    && docker-php-ext-install pdo_sqlite mbstring zip exif pcntl bcmath gd \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
 
-ENV COMPOSER_ALLOW_SUPERUSER=1
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy Composer from its official image
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Configure Apache to serve the Laravel public directory
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+    && sed -ri -e 's!/var/www/!/var/www/html/!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
+    && a2enmod rewrite
 
 WORKDIR /var/www/html
 
-# Install PHP dependencies (cached layer when composer files unchanged)
-COPY composer.json composer.lock* ./
-RUN composer install --no-interaction --optimize-autoloader --no-dev --no-scripts
-
+# Copy app source
 COPY . .
 
-RUN composer dump-autoload --optimize --no-interaction --no-dev
+# Create required Laravel directories
+RUN mkdir -p database \
+    && touch database/database.sqlite \
+    && mkdir -p storage/framework/cache \
+    && mkdir -p storage/framework/sessions \
+    && mkdir -p storage/framework/views \
+    && mkdir -p bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache database \
+    && chmod -R 775 storage bootstrap/cache database
 
-COPY .docker/entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# Install PHP deps and build frontend assets
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader \
+    && npm install \
+    && npm run build \
+    && php artisan storage:link \
+    && php artisan migrate --force
 
-# Copy Nginx configuration file (for single-container deploy)
-COPY nginx.conf /etc/nginx/http.d/default.conf
+EXPOSE 80
 
-# Copy Supervisor configuration file (for single-container deploy)
-COPY supervisord.conf /etc/supervisord.conf
-
-# Create a start script for single-container deploy (nginx + php-fpm)
-RUN echo '#!/bin/sh' > /start.sh && \
-    echo 'mkdir -p /run/nginx' >> /start.sh && \
-    echo 'supervisord -c /etc/supervisord.conf' >> /start.sh && \
-    chmod +x /start.sh
-
-EXPOSE 80 9000
-
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["php-fpm"]
+CMD ["apache2-foreground"]

@@ -1,6 +1,12 @@
+.env
+.env.*
+.git
+.github
 node_modules
 vendor
-.git
-.env
-storage/app/public/*
+storage/logs
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views
+storage/framework/testing
 bootstrap/cache/*.php
