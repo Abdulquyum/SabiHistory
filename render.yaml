@@ -17,7 +17,7 @@ services:
       # 5. Run database migrations automatically on deploy
       php artisan migrate --force
     startCommand: heroku-php-apache2 public/
-    disks:
+    disk:
       - name: sabihistory-storage
         mountPath: /var/www/html/storage
         sizeGB: 1
