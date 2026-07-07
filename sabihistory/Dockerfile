@@ -40,9 +40,10 @@ RUN mkdir -p database \
     && chown -R www-data:www-data storage bootstrap/cache database \
     && chmod -R 775 storage bootstrap/cache database
 
-# Install PHP deps and build frontend assets
+# Install PHP deps and build frontend assets (clean build to avoid stale/cached CSS-JS)
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader \
     && npm install \
+    && rm -rf public/build \
     && npm run build \
     && php artisan storage:link \
     && php artisan migrate --force
