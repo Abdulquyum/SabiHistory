@@ -43,11 +43,8 @@ services:
         value: false
       - key: APP_KEY # The build command generates this, but it's good practice to have it defined.
         generateValue: true # Let Render generate a secure key
-      - key: SESSION_ENCRYPT
-        value: true
-      # Enable required PHP extensions
-      - key: RENDER_PHP_EXTENSIONS
-        value: "gd zip"
+      - key: SESSION_DRIVER
+        value: database
       # Link to the environment group containing database credentials.
       - fromGroup: sabihistory-db-credentials
 
