@@ -47,7 +47,7 @@ services:
       - fromGroup: sabihistory-db-credentials
 
   # Database Service (PostgreSQL in this example)
-  - type: pserv
+  - type: psql
     name: sabihistory-db
     env: postgres
     plan: free
