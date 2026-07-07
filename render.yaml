@@ -18,9 +18,9 @@ services:
       php artisan migrate --force
     startCommand: heroku-php-apache2 public/
     disk:
-      - name: sabihistory-storage
-        mountPath: /var/www/html/storage
-        sizeGB: 1
+      name: sabihistory-storage
+      mountPath: /var/www/html/storage
+      sizeGB: 1
     envVars:
       - key: APP_URL
         value: https://sabihistory-web.onrender.com
