@@ -1,4 +1,4 @@
-FROM php:8.2-apache
+FROM php:8.3-apache
 
 # Install system deps, PHP extensions, Node.js, and Composer
 RUN apt-get update \
